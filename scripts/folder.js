@@ -2,7 +2,8 @@
 var _ = require('underscore'),
   $ = require('jquery'),
   React = require('react'),
-  RB = require('react-bootstrap');
+  RB = require('react-bootstrap'),
+  Actions = require('./actions');
 
 var Folder = React.createClass({
   getInitialState: function(){
@@ -33,6 +34,7 @@ var Folder = React.createClass({
       console.log('Error parsing dropped data: ', e);
     }
     console.log('Drop inputData', inputData);
+    Actions.createFolder();
     this.setState({
       isDropSuccess: true
     }, function(){
