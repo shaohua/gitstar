@@ -34,25 +34,6 @@ var AppView = React.createClass({
         this.saveUser(user);
       }
     }.bind(this));
-
-    //get all the data initially and after every change
-    //from /facebook/react/obj1 and /react-bootstrap/react-bootstrap/obj2
-    //to [obj1, obj2]
-    var data, allItems;
-    this.compRef.on("value", function(dataSnapshot) {
-      data = dataSnapshot.val();
-      allItems = _.chain(data)
-        .values()
-        .map(function(item){ return _.values(item); })
-        .flatten()
-        .value();
-
-      if (typeof window !== 'undefined') { //browser only
-        this.setState({
-          items: allItems
-        });
-      }
-    }.bind(this));
   },
 
   componentDidMount: function() {
@@ -66,20 +47,52 @@ var AppView = React.createClass({
     this.firebaseRef.off();
   },
 
+  getStars: function(){
+    var githubApi = 'https://api.github.com';
+    var token = '&access_token=' + this.state.user.accessToken;
+    $.ajax({
+        type: 'GET',
+        url: githubApi + '/users/shaohua/starred?per_page=100' + token
+      })
+      .then(function(data){
+        var transformed = this.transformStars(data);
+        this.saveStars(transformed);
+      }.bind(this));
+  },
+
+  //assuming id is the unique github repo id
+  //converting an array to an object
+  transformStars: function(input){
+    var output = {};
+    _.each(input, function(item){
+      output[item.id] = item;
+      delete output[item.id].id;
+    });
+    return output;
+  },
+
+  saveStars: function(stars){
+    var currentPeopleRef = this.peopleRef.child( this.state.user.id );
+    currentPeopleRef.child('stars').set(stars);
+  },
+
   saveUser: function(user){
     console.log('user', user);
     var currentPeopleRef = this.peopleRef.child( user.id );
     currentPeopleRef.once("value", function(peopleSnap) {
+      var userObj = {
+        id: user.id,
+        uid: user.uid,
+        provider: user.provider,
+        username: user.username
+      };
+
       var val = peopleSnap.val();
+      // If this is a first time login, upload user details.
       if (!val) {
-        // If this is a first time login, upload user details.
-        currentPeopleRef.set({
-          id: user.id,
-          uid: user.uid,
-          provider: user.provider,
-          username: user.username
-        });
+        currentPeopleRef.set(userObj);
       }
+
       currentPeopleRef.child("presence").set("online");
     });
   },
@@ -100,9 +113,10 @@ var AppView = React.createClass({
     return (
       <div>
         <RB.Grid>
-          <Header />
+          <Header onLogin={this.onLogin}/>
           <RB.Row>
             <RB.Col sm={3} className="gs-column-groups">
+              <button onClick={this.getStars}>getStars</button>
               <Folders />
             </RB.Col>
 

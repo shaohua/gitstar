@@ -6,10 +6,16 @@ var _ = require('underscore'),
   Folder = require('./folder');
 
 var Folders = React.createClass({
+  createFolder: function(){
+    console.log('createFolder');
+  },
+
   render: function(){
     return (
       <div className="list-group gs-folders">
-        <a href="#" className="list-group-item">
+        <a href="#"
+          onClick={this.createFolder}
+          className="list-group-item">
           <RB.Glyphicon glyph="plus" /> Create a new folder
         </a>
         <Folder />
