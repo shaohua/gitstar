@@ -53,7 +53,7 @@ var Folder = React.createClass({
         onDragOver={this.preventDefault}
         onDrop={this.onDrop}
         className={classes}>
-        <RB.Glyphicon glyph="folder-open" />Cras justo odio
+        <RB.Glyphicon glyph="folder-open" />{this.props.folderName}
       </a>
     );
   }

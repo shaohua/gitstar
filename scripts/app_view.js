@@ -16,6 +16,7 @@ var AppView = React.createClass({
 
     return {
       items: [],
+      folders: [],
       user: null
     };
   },
@@ -31,6 +32,7 @@ var AppView = React.createClass({
       });
 
       if(user && user.id) {
+        this.initFolders();
         this.saveUser(user);
       }
     }.bind(this));
@@ -109,6 +111,29 @@ var AppView = React.createClass({
     this.auth.logout();
   },
 
+  //for folders
+  initFolders: function(){
+    var user = this.state.user;
+    if(user){
+      this.peopleRef.child( user.id ).child('folders')
+        .on("value", function(dataSnapshot) {
+          // console.log('folders', dataSnapshot.val());
+          this.setState({
+            folders: dataSnapshot.val()
+          });
+      }.bind(this));
+    }
+  },
+
+  //for folder
+  saveFoldersToFirebase: function(state){
+    var user = this.state.user;
+    if(user){
+      this.peopleRef.child( user.id ).child('folders')
+        .set(state.folders);
+    }
+  },
+
   render: function() {
     return (
       <div>
@@ -117,7 +142,9 @@ var AppView = React.createClass({
           <RB.Row>
             <RB.Col sm={3} className="gs-column-groups">
               <button onClick={this.getStars}>getStars</button>
-              <Folders />
+              <Folders
+                save={this.saveFoldersToFirebase}
+                folders={this.state.folders}/>
             </RB.Col>
 
             <RB.Col sm={9} className="gs-column-repos col-sm-offset-3">
