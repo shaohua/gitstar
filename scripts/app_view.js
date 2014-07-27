@@ -10,7 +10,7 @@ var _ = require('underscore'),
 
 var AppView = React.createClass({
   getInitialState: function() {
-    this.firebaseRef = new Firebase("//reactjsx.firebaseio.com");
+    this.firebaseRef = new Firebase("//gitstar.firebaseIO.com");
     this.peopleRef = this.firebaseRef.child("people");
     this.compRef = this.firebaseRef.child("components");
 
