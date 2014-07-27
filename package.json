@@ -1,6 +1,7 @@
 {
   "dependencies": {},
   "devDependencies": {
+    "backbone": "^1.1.2",
     "browserify": "^4.2.3",
     "browserify-shim": "^3.6.0",
     "envify": "^1.2.1",
