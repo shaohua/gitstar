@@ -1,25 +1,34 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <!-- normalize css -->
+    <!-- normalize, fontawesome, bootstrap -->
     <link rel="stylesheet" type="text/css" href="bower_components/normalize.css/normalize.css">
 
-    <!-- bootstrap css -->
+    <link rel="stylesheet" type="text/css" href="bower_components/font-awesome/css/font-awesome.css">
+
+
     <link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css">
 
-    <!-- $ and _ -->
+    <!-- gitstar css -->
+    <link rel="stylesheet" type="text/css" href="dist/gitstar.css">
+
+    <!-- $, _, React, ReactBootstrap -->
+    <!-- they are very large, hence should be extracted from the bundle and served through CDN -->
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/react/react-with-addons.min.js"></script>
+    <script src="bower_components/react-bootstrap/react-bootstrap.js"></script>
+
+    <!--todo, necessary to load again? -->
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
 
     <script src="//cdn.firebase.com/js/client/1.0.15/firebase.js"></script>
     <script src='//cdn.firebase.com/js/simple-login/1.5.0/firebase-simple-login.js'></script>
 
-    <script type="text/javascript" src="index.js"></script>
+    <script type="text/javascript" src="dist/gitstar.js"></script>
 
   </head>
   <body>
-
-
+    <div id="main-app"></div>
   </body>
 </html>

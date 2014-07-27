@@ -1,12 +1,46 @@
 {
   "dependencies": {},
   "devDependencies": {
+    "browserify": "^4.2.3",
+    "browserify-shim": "^3.6.0",
     "envify": "^1.2.1",
     "firebase": "^1.0.17",
+    "grunt-browserify": "^2.1.4",
     "grunt-contrib-connect": "^0.7.1",
+    "grunt-contrib-stylus": "^0.18.0",
+    "grunt-contrib-watch": "^0.6.1",
     "jquery": "^2.1.1",
+    "load-grunt-tasks": "^0.6.0",
+    "moment": "^2.7.0",
+    "nib": "^1.0.3",
     "node-jsx": "^0.10.0",
     "react": "^0.10.0",
+    "react-bootstrap": "^0.11.0",
+    "reactify": "^0.14.0",
+    "stylus": "^0.47.3",
     "underscore": "^1.6.0"
+  },
+  "scripts": {
+    "postinstall": "bower install"
+  },
+  "browserify": {
+    "transform": [
+      "reactify",
+      "browserify-shim"
+    ]
+  },
+  "browserify-shim": {
+    "jquery": {
+      "exports": "global:$"
+    },
+    "underscore": {
+      "exports": "global:_"
+    },
+    "react": {
+      "exports": "global:React"
+    },
+    "react-bootstrap": {
+      "exports": "global:ReactBootstrap"
+    }
   }
 }
