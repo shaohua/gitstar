@@ -30,8 +30,7 @@ var defaultFolder = {
 
 var _initStore = function(userId){
   var FirebaseModel = Backbone.Firebase.Model.extend({
-    firebase: "https://gitstar.firebaseIO.com/people/" +
-                userId + "/model"
+    firebase: "https://gitstar.firebaseIO.com/people/" + userId
   });
 
   Store = new FirebaseModel();
@@ -60,27 +59,6 @@ var _initStore = function(userId){
   dfd.resolve(Store);
 };
 
-var _saveUser = function(user){
-  console.log('user', user);
-  var userObj = {
-    id: user.id,
-    uid: user.uid,
-    provider: user.provider,
-    username: user.username
-  };
-
-  var currentPeopleRef = firebaseRef.child('people').child( user.id );
-  currentPeopleRef.once("value", function(peopleSnap) {
-    var val = peopleSnap.val();
-    // If this is a first time login, upload user details.
-    if (!val) {
-      currentPeopleRef.set(userObj);
-    }
-
-    currentPeopleRef.child("presence").set("online");
-  });
-};
-
 /**
  * For auth
  */
@@ -95,13 +73,23 @@ vent.on('auth', function(){
       //bind the store to a dynamic URL
       _initStore(user.id);
 
-      //todo
-      //might only need auth_code
+      var userObj = {
+        id: user.id,
+        uid: user.uid,
+        provider: user.provider,
+        username: user.username,
+        accessToken: user.accessToken
+      };
+
       Store.set({
-        user: user
+        user: userObj
       });
 
-      _saveUser(user);
+      //initial import
+      if(!Store.get('imported')){
+        _getStars();
+        Store.set('imported', true);
+      }
     }
   }.bind(this));
 })
@@ -169,12 +157,6 @@ var _transformStars = function(input){
   return output;
 };
 
-var _saveStars = function(stars){
-  Store.set({
-    stars: stars
-  });
-};
-
 var _saveToDefaultFolder = function(stars){
   //deep clone is necessary to trigger change
   //trigger change is necessary for Firebase to sync
@@ -194,8 +176,7 @@ var _saveToDefaultFolder = function(stars){
   Store.set('folders', foldersCopy);
 };
 
-vent.on('star:read', function(){
-  console.log('getStars');
+var _getStars = function(){
   var user = Store.get('user');
   if(user){
     var githubApi = 'https://api.github.com';
@@ -209,12 +190,11 @@ vent.on('star:read', function(){
         Store.set({
           stars: transformed
         });
-        _saveStars(transformed);
 
         _saveToDefaultFolder(transformed);
       }.bind(this));
   }
-});
+};
 
 /**
  * For Firebase

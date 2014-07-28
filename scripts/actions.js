@@ -25,10 +25,6 @@ var Actions = {
     vent.trigger('folderIndex:update', payload);
   },
 
-  readStar: function(){
-    vent.trigger('star:read');
-  },
-
   offFirebase: function(){
     vent.trigger('firebase:off');
   }

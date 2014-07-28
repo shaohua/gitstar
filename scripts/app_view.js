@@ -16,13 +16,19 @@ var _ = require('underscore'),
  * good idea or not?
  */
 var _getStarsCurrentFolder = function(myStore){
-   var currentFolder = myStore.folders[myStore.folderIndex];
-
-    if(currentFolder){
-      var starsInCurrentFolder = _.keys(currentFolder.repos);
-      return _.pick(myStore.stars, starsInCurrentFolder);
-    }
+  if(_.isUndefined(myStore.folders) ||
+     _.isUndefined(myStore.folderIndex) ||
+     _.isUndefined(myStore.stars)
+    ) {
+    return;
   }
+
+  var currentFolder = myStore.folders[myStore.folderIndex];
+  if(currentFolder){
+    var starsInCurrentFolder = _.keys(currentFolder.repos);
+    return _.pick(myStore.stars, starsInCurrentFolder);
+  }
+};
 
 var _getStateFromStore = function(myStore){
   //myStore is NO longer a Backbone model
@@ -65,10 +71,6 @@ var AppView = React.createClass({
     }.bind(this));
   },
 
-  getStars: function(){
-    Actions.readStar();
-  },
-
   render: function() {
     return (
       <div>
@@ -76,7 +78,6 @@ var AppView = React.createClass({
           <Header user={this.state.user}/>
           <RB.Row>
             <RB.Col sm={3} className="gs-column-groups">
-              <button onClick={this.getStars}>getStars</button>
               <Folders
                 folderIndex={this.state.folderIndex}
                 folders={this.state.folders}/>
