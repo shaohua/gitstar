@@ -13,8 +13,10 @@ var Folders = React.createClass({
   },
 
   render: function(){
-    var allFolders = _.map(this.props.folders, function(folder){
-      return <Folder folderName={folder.name}/>;
+    var allFolders = _.map(this.props.folders, function(folder, index){
+      return <Folder
+        folderIndex={index}
+        folderName={folder.name}/>;
     });
     return (
       <div className="list-group gs-folders">

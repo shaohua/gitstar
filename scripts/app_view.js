@@ -12,7 +12,10 @@ var _ = require('underscore'),
 
 var _getStateFromStore = function(){
   return {
-    folders: Store.get('folders') || [],
+    folders: Store.get('folders'),
+    folderIndex: Store.get('folderIndex'),
+    stars: Store.get('stars'),
+    starsCurrentFolder: Store.GetStarsCurrentFolder(),  //derived data
     user: Store.get('user')
   };
 };
@@ -23,7 +26,9 @@ var AppView = React.createClass({
   },
 
   _onRefreshState: function(){
-    this.setState( _getStateFromStore() );
+    this.setState( _getStateFromStore(), function(){
+      console.log('_onRefreshState', this.state);
+    }.bind(this) );
   },
 
   componentWillMount: function(){
@@ -65,7 +70,7 @@ var AppView = React.createClass({
             </RB.Col>
 
             <RB.Col sm={9} className="gs-column-repos col-sm-offset-3">
-              <Cards />
+              <Cards folderIndex={this.state.folderIndex}/>
             </RB.Col>
           </RB.Row>
 

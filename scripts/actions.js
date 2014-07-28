@@ -17,6 +17,14 @@ var Actions = {
     vent.trigger('folder:create');
   },
 
+  updateFolder: function(payload){
+    vent.trigger('folder:update', payload);
+  },
+
+  updateFolderIndex: function(payload){
+    vent.trigger('folderIndex:update', payload);
+  },
+
   readStar: function(){
     vent.trigger('star:read');
   },

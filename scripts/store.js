@@ -12,6 +12,13 @@ var firebaseAuth;
  * Init data
  */
 
+Store.set({
+  folders: [],
+  folderIndex: 0,
+  stars: {},
+  user: undefined
+});
+
 var _initFolders = function(){
   var user = Store.get('user');
   if(user){
@@ -20,6 +27,18 @@ var _initFolders = function(){
         // console.log('folders', dataSnapshot.val());
         Store.set({
           folders: dataSnapshot.val()
+        });
+    }.bind(this));
+  }
+};
+
+var _initStars = function(){
+  var user = Store.get('user');
+  if(user){
+    firebaseRef.child('people').child( user.id ).child('stars')
+      .on("value", function(dataSnapshot) {
+        Store.set({
+          stars: dataSnapshot.val()
         });
     }.bind(this));
   }
@@ -62,6 +81,7 @@ vent.on('auth', function(){
 
     if(user && user.id) {
       _initFolders();
+      _initStars();
       _saveUser(user);
     }
   }.bind(this));
@@ -80,7 +100,7 @@ vent.on('auth:logout', function(){
 /**
  * For folders
  */
-var _saveFoldersToFirebase = function(folders){
+var _saveFolders = function(folders){
   var user = Store.get('user');
   if(user){
     firebaseRef.child('people').child( user.id ).child('folders')
@@ -90,11 +110,11 @@ var _saveFoldersToFirebase = function(folders){
 
 var defaultFolder = {
   name: '',
-  repos: []
+  repos: {}
 };
 
-vent.on('folder:create', function(data){
-  var foldersCopy = (Store.get('folders') || []).slice();
+vent.on('folder:create', function(){
+  var foldersCopy = Store.get('folders').slice();
   var numberFolders = foldersCopy.length;
 
   var newFolderName = 'Folder ' + foldersCopy.length;
@@ -102,7 +122,20 @@ vent.on('folder:create', function(data){
   foldersCopy.push(newFolder);
 
   Store.set('folders', foldersCopy);
-  _saveFoldersToFirebase(foldersCopy);
+  _saveFolders(foldersCopy);
+});
+
+vent.on('folder:update', function(repoId){
+  var foldersCopy = Store.get('folders').slice();
+  foldersCopy[Store.get('folderIndex')].repos = foldersCopy[Store.get('folderIndex')].repos || {};
+  foldersCopy[Store.get('folderIndex')].repos[repoId] = true;
+
+  Store.set('folders', foldersCopy);
+  _saveFolders(foldersCopy);
+});
+
+vent.on('folderIndex:update', function(newIndex){
+  Store.set('folderIndex', newIndex);
 });
 
 /**
@@ -119,7 +152,7 @@ var _transformStars = function(input){
   return output;
 };
 
-var _saveStarsToFirebase = function(stars){
+var _saveStars = function(stars){
   var user = Store.get('user');
   if(user){
     firebaseRef.child('people').child( user.id ).child('stars')
@@ -129,16 +162,22 @@ var _saveStarsToFirebase = function(stars){
 
 vent.on('star:read', function(){
   console.log('getStars');
-  var githubApi = 'https://api.github.com';
-  var token = '&access_token=' + this.state.user.accessToken;
-  $.ajax({
-      type: 'GET',
-      url: githubApi + '/users/shaohua/starred?per_page=100' + token
-    })
-    .then(function(data){
-      var transformed = this._transformStars(data);
-      this._saveStarsToFirebase(transformed);
-    }.bind(this));
+  var user = Store.get('user');
+  if(user){
+    var githubApi = 'https://api.github.com';
+    var token = '&access_token=' + user.accessToken;
+    $.ajax({
+        type: 'GET',
+        url: githubApi + '/users/shaohua/starred?per_page=100' + token
+      })
+      .then(function(data){
+        var transformed = _transformStars(data);
+        Store.set({
+          stars: transformed
+        });
+        _saveStars(transformed);
+      }.bind(this));
+  }
 });
 
 /**
@@ -147,5 +186,21 @@ vent.on('star:read', function(){
 vent.on('firebase:off', function(){
   firebaseRef.off();
 });
+
+/**
+ * For derived data
+ * todo, good idea or not?
+ */
+Store.GetStarsCurrentFolder = function(){
+ var stars = Store.get('stars'),
+  folders = Store.get('folders'),
+  folderIndex = Store.get('folderIndex'),
+  currentFolder = folders[folderIndex];
+
+  if(currentFolder){
+    var starsInCurrentFolder = _.keys(currentFolder.repos);
+    return _.pick(stars, starsInCurrentFolder);
+  }
+};
 
 module.exports = Store;

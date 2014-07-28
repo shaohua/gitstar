@@ -34,7 +34,8 @@ var Folder = React.createClass({
       console.log('Error parsing dropped data: ', e);
     }
     console.log('Drop inputData', inputData);
-    Actions.createFolder();
+    Actions.updateFolderIndex(this.props.folderIndex);
+    Actions.updateFolder(1032);
     this.setState({
       isDropSuccess: true
     }, function(){
