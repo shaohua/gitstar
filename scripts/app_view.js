@@ -69,19 +69,11 @@ var AppView = React.createClass({
     Actions.readStar();
   },
 
-  onLogin: function(){
-    Actions.authLogin();
-  },
-
-  onLogout: function(){
-    Actions.authLogout();
-  },
-
   render: function() {
     return (
       <div>
         <RB.Grid>
-          <Header onLogin={this.onLogin}/>
+          <Header user={this.state.user}/>
           <RB.Row>
             <RB.Col sm={3} className="gs-column-groups">
               <button onClick={this.getStars}>getStars</button>

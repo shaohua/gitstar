@@ -114,6 +114,8 @@ vent.on('auth:login', function(){
 
 vent.on('auth:logout', function(){
   firebaseAuth.logout();
+  //true to reload from the server rather than the cache
+  location.reload(true);
 });
 
 /**
