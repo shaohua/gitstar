@@ -26,17 +26,19 @@ var Card = React.createClass({
   },
 
   render: function(){
+    var card = this.props.card,
+      cardId = this.props.cardId;
     return (
       <div
         draggable="true"
         onDragStart={this.onDragStart}
         onDragEnd={this.onDragEnd}
         className="col-lg-3 col-md-6 panel panel-primary">
-        <div className="panel-heading">facebook/react</div>
+        <div className="panel-heading">{card.full_name}</div>
         <div class="panel-body">
-          <p>React is a JavaScript library for building user interfaces. It's declarative, efficient, and extremely flexible. What's more, it works with the libraries and frameworks that you already know.</p>
+          <p>ID: {cardId}</p>
         </div>
-        <div className="panel-footer">Preview</div>
+        <div className="panel-footer">{card.watchers_count}</div>
       </div>
     );
   }

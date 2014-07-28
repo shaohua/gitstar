@@ -70,7 +70,7 @@ var AppView = React.createClass({
             </RB.Col>
 
             <RB.Col sm={9} className="gs-column-repos col-sm-offset-3">
-              <Cards folderIndex={this.state.folderIndex}/>
+              <Cards cards={this.state.starsCurrentFolder}/>
             </RB.Col>
           </RB.Row>
 
