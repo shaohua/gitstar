@@ -10,7 +10,8 @@
 
 var _ = require('underscore'),
   $ = require('jquery'),
-  React = require('react');
+  React = require('react'),
+  RB = require('react-bootstrap');
 
 var Card = React.createClass({
   onDragStart: function(event){
@@ -31,12 +32,26 @@ var Card = React.createClass({
         draggable="true"
         onDragStart={this.onDragStart}
         onDragEnd={this.onDragEnd}
-        className="col-lg-3 col-md-6 panel panel-primary">
-        <div className="panel-heading">{card.full_name}</div>
-        <div class="panel-body">
-          <p>ID: {cardId}</p>
+        className="col-lg-3 col-md-6">
+        <div className="panel panel-success">
+          <div className="panel-heading">
+            <RB.Row>
+              <RB.Col xs={3}>
+                <img
+                  src={card.owner.avatar_url}
+                  className="img-responsive img-rounded"/>
+              </RB.Col>
+              <RB.Col xs={9}>
+                {card.full_name}
+              </RB.Col>
+            </RB.Row>
+          </div>
+          <div className="panel-footer">
+            <span className="pull-left"><RB.Glyphicon glyph="star-empty" /> {card.watchers_count}</span>
+            <span className="pull-right"></span>
+            <div className="clearfix"></div>
+          </div>
         </div>
-        <div className="panel-footer">{card.watchers_count}</div>
       </div>
     );
   }
