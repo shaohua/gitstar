@@ -15,9 +15,10 @@ var Folders = React.createClass({
   render: function(){
     var allFolders = _.map(this.props.folders, function(folder, index){
       return <Folder
-        folderIndex={index}
+        domIndex={index}
+        activeFolderIndex={this.props.folderIndex}
         folderName={folder.name}/>;
-    });
+    }, this);
     return (
       <div className="list-group gs-folders">
         <a href="#"

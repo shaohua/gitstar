@@ -28,9 +28,9 @@ var _getStateFromStore = function(myStore){
   //myStore is NO longer a Backbone model
   // console.log('myStore', myStore);
   return {
-    folders: myStore.folders,
-    folderIndex: myStore.folderIndex,
-    stars: myStore.stars,
+    folders: myStore.folders, //array
+    folderIndex: myStore.folderIndex, //int
+    stars: myStore.stars, //object
     starsCurrentFolder: _getStarsCurrentFolder(myStore),  //derived data
     user: myStore.user
   };
@@ -86,6 +86,7 @@ var AppView = React.createClass({
             <RB.Col sm={3} className="gs-column-groups">
               <button onClick={this.getStars}>getStars</button>
               <Folders
+                folderIndex={this.state.folderIndex}
                 folders={this.state.folders}/>
             </RB.Col>
 

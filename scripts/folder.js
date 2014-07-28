@@ -33,9 +33,10 @@ var Folder = React.createClass({
     } catch (e) {
       console.log('Error parsing dropped data: ', e);
     }
-    console.log('Drop inputData', inputData);
-    Actions.updateFolderIndex(this.props.folderIndex);
-    Actions.updateFolder(1032);
+    Actions.updateFolder({
+      folderIndex: this.props.domIndex,
+      cardId: inputData
+    });
     this.setState({
       isDropSuccess: true
     }, function(){
@@ -43,20 +44,26 @@ var Folder = React.createClass({
     }.bind(this));
   },
 
+  navigate: function(){
+    Actions.updateFolderIndex(this.props.domIndex);
+  },
+
   render: function(){
     var cx = React.addons.classSet;
     var classes = cx({
       'list-group-item': true,
-      'list-group-item-success': this.state.isDropSuccess
+      'list-group-item-success': this.state.isDropSuccess,
+      'active': (this.props.activeFolderIndex === this.props.domIndex)
     });
 
     return (
       <a href="#"
+        onClick={this.navigate}
         onDragEnter={this.preventDefault}
         onDragOver={this.preventDefault}
         onDrop={this.onDrop}
         className={classes}>
-        <RB.Glyphicon glyph="folder-open" />{this.props.folderName}
+        <RB.Glyphicon glyph="folder-open" /> {this.props.folderName}
       </a>
     );
   }

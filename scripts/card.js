@@ -14,10 +14,8 @@ var _ = require('underscore'),
 
 var Card = React.createClass({
   onDragStart: function(event){
-    var testData = {
-      name: 'facebook/react'
-    };
-    event.dataTransfer.setData('text', JSON.stringify(testData));
+    var dragData = this.props.cardId;
+    event.dataTransfer.setData('text', dragData);
   },
 
   onDragEnd: function(event){

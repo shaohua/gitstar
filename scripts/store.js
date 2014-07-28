@@ -131,10 +131,20 @@ vent.on('folder:create', function(){
   Store.set('folders', foldersCopy);
 });
 
-vent.on('folder:update', function(repoId){
+vent.on('folder:update', function(payload){
+  var cardId = payload.cardId,
+    folderIndex = payload.folderIndex;
+
   var foldersCopy = deepcopy(Store.get('folders'));
-  foldersCopy[Store.get('folderIndex')].repos = foldersCopy[Store.get('folderIndex')].repos || {};
-  foldersCopy[Store.get('folderIndex')].repos[repoId] = true;
+  //delete from everywhere
+  _.each(foldersCopy, function(folder){
+    if(folder.repos){
+      delete folder.repos[cardId];
+    }
+  });
+  //add to target
+  foldersCopy[folderIndex].repos = foldersCopy[folderIndex].repos || {};
+  foldersCopy[folderIndex].repos[cardId] = true;
 
   Store.set('folders', foldersCopy);
 });
