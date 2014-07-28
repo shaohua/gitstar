@@ -10,23 +10,39 @@ var _ = require('underscore'),
   Store = require('./store'),
   Actions = require('./actions');
 
-var _getStateFromStore = function(){
+/**
+ * methods to derive data
+ * todo
+ * good idea or not?
+ */
+var _getStarsCurrentFolder = function(myStore){
+   var currentFolder = myStore.folders[myStore.folderIndex];
+
+    if(currentFolder){
+      var starsInCurrentFolder = _.keys(currentFolder.repos);
+      return _.pick(myStore.stars, starsInCurrentFolder);
+    }
+  }
+
+var _getStateFromStore = function(myStore){
+  //myStore is NO longer a Backbone model
+  // console.log('myStore', myStore);
   return {
-    folders: Store.get('folders'),
-    folderIndex: Store.get('folderIndex'),
-    stars: Store.get('stars'),
-    starsCurrentFolder: Store.GetStarsCurrentFolder(),  //derived data
-    user: Store.get('user')
+    folders: myStore.folders,
+    folderIndex: myStore.folderIndex,
+    stars: myStore.stars,
+    starsCurrentFolder: _getStarsCurrentFolder(myStore),  //derived data
+    user: myStore.user
   };
 };
 
 var AppView = React.createClass({
   getInitialState: function(){
-    return _getStateFromStore();
+    return {};
   },
 
-  _onRefreshState: function(){
-    this.setState( _getStateFromStore(), function(){
+  _onRefreshState: function(myStore){
+    this.setState( _getStateFromStore(myStore.val()), function(){
       console.log('_onRefreshState', this.state);
     }.bind(this) );
   },
@@ -36,13 +52,17 @@ var AppView = React.createClass({
   },
 
   componentDidMount: function(){
-    Store.on('change', this._onRefreshState);
+    Store.then(function(myStore){
+      myStore.firebase.on('value', this._onRefreshState);
+    }.bind(this));
   },
 
   //unbind events
   componentWillUnmount: function(){
     Actions.offFirebase();
-    Store.off('change', this._onRefreshState);
+    Store.then(function(myStore){
+      myStore.firebase.off('value', this._onRefreshState);
+    }.bind(this));
   },
 
   getStars: function(){
@@ -50,11 +70,11 @@ var AppView = React.createClass({
   },
 
   onLogin: function(){
-    Actions.trigger('auth:login');
+    Actions.authLogin();
   },
 
   onLogout: function(){
-    Actions.trigger('auth:logout');
+    Actions.authLogout();
   },
 
   render: function() {

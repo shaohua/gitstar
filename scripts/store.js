@@ -3,45 +3,61 @@ var vent = require('./vent').getInstance(),
   $ = require('jquery'),
   Backbone = require('backbone');
 
-var Store = new Backbone.Model();
+var dfd = $.Deferred();
+
+//vanilla Backbone will be overwritten as soon as firebase is ready
+var Store;
 
 var firebaseRef = new Firebase("//gitstar.firebaseIO.com");
 var firebaseAuth;
 
 /**
- * Init data
+ * Utils
  */
-
-Store.set({
-  folders: [],
-  folderIndex: 0,
-  stars: {},
-  user: undefined
-});
-
-var _initFolders = function(){
-  var user = Store.get('user');
-  if(user){
-    firebaseRef.child('people').child( user.id ).child('folders')
-      .on("value", function(dataSnapshot) {
-        // console.log('folders', dataSnapshot.val());
-        Store.set({
-          folders: dataSnapshot.val()
-        });
-    }.bind(this));
-  }
+//todo
+//use a better one
+var deepcopy = function(input){
+  return JSON.parse(JSON.stringify(input));
 };
 
-var _initStars = function(){
-  var user = Store.get('user');
-  if(user){
-    firebaseRef.child('people').child( user.id ).child('stars')
-      .on("value", function(dataSnapshot) {
-        Store.set({
-          stars: dataSnapshot.val()
-        });
-    }.bind(this));
-  }
+/**
+ * Init data
+ */
+var defaultFolder = {
+  name: 'defaultFolder',
+  repos: {}
+};
+
+var _initStore = function(userId){
+  var FirebaseModel = Backbone.Firebase.Model.extend({
+    firebase: "https://gitstar.firebaseIO.com/people/" +
+                userId + "/model"
+  });
+
+  Store = new FirebaseModel();
+
+  //fill defaults after loading
+  Store.firebase.on('value', function(storeSnap){
+    // console.log('storeSnap', storeSnap.val());
+
+    if( _.isUndefined(Store.get('folders')) ) {
+      Store.set({
+        folders: [defaultFolder]
+      });
+    }
+    if( _.isUndefined(Store.get('folderIndex')) ) {
+      Store.set({
+        folderIndex: 0
+      });
+    }
+    if( _.isUndefined(Store.get('stars')) ) {
+      Store.set({
+        stars: {}
+      });
+    }
+  });
+
+  dfd.resolve(Store);
 };
 
 var _saveUser = function(user){
@@ -75,13 +91,16 @@ vent.on('auth', function(){
   firebaseAuth = new FirebaseSimpleLogin(firebaseRef, function(error, user) {
     if (error) return;
 
-    Store.set({
-      user: user
-    });
-
     if(user && user.id) {
-      _initFolders();
-      _initStars();
+      //bind the store to a dynamic URL
+      _initStore(user.id);
+
+      //todo
+      //might only need auth_code
+      Store.set({
+        user: user
+      });
+
       _saveUser(user);
     }
   }.bind(this));
@@ -100,21 +119,9 @@ vent.on('auth:logout', function(){
 /**
  * For folders
  */
-var _saveFolders = function(folders){
-  var user = Store.get('user');
-  if(user){
-    firebaseRef.child('people').child( user.id ).child('folders')
-      .set(folders);
-  }
-};
-
-var defaultFolder = {
-  name: '',
-  repos: {}
-};
 
 vent.on('folder:create', function(){
-  var foldersCopy = Store.get('folders').slice();
+  var foldersCopy = deepcopy(Store.get('folders'));
   var numberFolders = foldersCopy.length;
 
   var newFolderName = 'Folder ' + foldersCopy.length;
@@ -122,16 +129,14 @@ vent.on('folder:create', function(){
   foldersCopy.push(newFolder);
 
   Store.set('folders', foldersCopy);
-  _saveFolders(foldersCopy);
 });
 
 vent.on('folder:update', function(repoId){
-  var foldersCopy = Store.get('folders').slice();
+  var foldersCopy = deepcopy(Store.get('folders'));
   foldersCopy[Store.get('folderIndex')].repos = foldersCopy[Store.get('folderIndex')].repos || {};
   foldersCopy[Store.get('folderIndex')].repos[repoId] = true;
 
   Store.set('folders', foldersCopy);
-  _saveFolders(foldersCopy);
 });
 
 vent.on('folderIndex:update', function(newIndex){
@@ -153,11 +158,28 @@ var _transformStars = function(input){
 };
 
 var _saveStars = function(stars){
-  var user = Store.get('user');
-  if(user){
-    firebaseRef.child('people').child( user.id ).child('stars')
-      .set(stars);
+  Store.set({
+    stars: stars
+  });
+};
+
+var _saveToDefaultFolder = function(stars){
+  //deep clone is necessary to trigger change
+  //trigger change is necessary for Firebase to sync
+  var foldersCopy = deepcopy(Store.get('folders'));
+  if(foldersCopy.length<1) {
+    foldersCopy.push(defaultFolder);
   }
+
+  var firstFolder = foldersCopy[0];
+  _.chain(stars)
+    .keys()
+    .each(function(key){
+      firstFolder.repos = firstFolder.repos || {};
+      firstFolder.repos[key] = true;
+    });
+
+  Store.set('folders', foldersCopy);
 };
 
 vent.on('star:read', function(){
@@ -176,6 +198,8 @@ vent.on('star:read', function(){
           stars: transformed
         });
         _saveStars(transformed);
+
+        _saveToDefaultFolder(transformed);
       }.bind(this));
   }
 });
@@ -187,20 +211,4 @@ vent.on('firebase:off', function(){
   firebaseRef.off();
 });
 
-/**
- * For derived data
- * todo, good idea or not?
- */
-Store.GetStarsCurrentFolder = function(){
- var stars = Store.get('stars'),
-  folders = Store.get('folders'),
-  folderIndex = Store.get('folderIndex'),
-  currentFolder = folders[folderIndex];
-
-  if(currentFolder){
-    var starsInCurrentFolder = _.keys(currentFolder.repos);
-    return _.pick(stars, starsInCurrentFolder);
-  }
-};
-
-module.exports = Store;
+module.exports = dfd.promise();
