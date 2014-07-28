@@ -3,47 +3,60 @@ var vent = require('./vent').getInstance(),
   $ = require('jquery'),
   Backbone = require('backbone');
 
-var Store = new Backbone.Model();
+var dfd = $.Deferred();
+
+//vanilla Backbone will be overwritten as soon as firebase is ready
+var Store;
 
 var firebaseRef = new Firebase("//gitstar.firebaseIO.com");
 var firebaseAuth;
 
 /**
- * Init data
+ * Utils
  */
-
-var _initFolders = function(){
-  var user = Store.get('user');
-  if(user){
-    firebaseRef.child('people').child( user.id ).child('folders')
-      .on("value", function(dataSnapshot) {
-        // console.log('folders', dataSnapshot.val());
-        Store.set({
-          folders: dataSnapshot.val()
-        });
-    }.bind(this));
-  }
+//todo
+//use a better one
+var deepcopy = function(input){
+  return JSON.parse(JSON.stringify(input));
 };
 
-var _saveUser = function(user){
-  console.log('user', user);
-  var userObj = {
-    id: user.id,
-    uid: user.uid,
-    provider: user.provider,
-    username: user.username
-  };
+/**
+ * Init data
+ */
+var defaultFolder = {
+  name: 'defaultFolder',
+  repos: {}
+};
 
-  var currentPeopleRef = firebaseRef.child('people').child( user.id );
-  currentPeopleRef.once("value", function(peopleSnap) {
-    var val = peopleSnap.val();
-    // If this is a first time login, upload user details.
-    if (!val) {
-      currentPeopleRef.set(userObj);
-    }
-
-    currentPeopleRef.child("presence").set("online");
+var _initStore = function(userId){
+  var FirebaseModel = Backbone.Firebase.Model.extend({
+    firebase: "https://gitstar.firebaseIO.com/people/" + userId
   });
+
+  Store = new FirebaseModel();
+
+  //fill defaults after loading
+  Store.firebase.on('value', function(storeSnap){
+    // console.log('storeSnap', storeSnap.val());
+
+    if( _.isUndefined(Store.get('folders')) ) {
+      Store.set({
+        folders: [defaultFolder]
+      });
+    }
+    if( _.isUndefined(Store.get('folderIndex')) ) {
+      Store.set({
+        folderIndex: 0
+      });
+    }
+    if( _.isUndefined(Store.get('stars')) ) {
+      Store.set({
+        stars: {}
+      });
+    }
+  });
+
+  dfd.resolve(Store);
 };
 
 /**
@@ -56,13 +69,27 @@ vent.on('auth', function(){
   firebaseAuth = new FirebaseSimpleLogin(firebaseRef, function(error, user) {
     if (error) return;
 
-    Store.set({
-      user: user
-    });
-
     if(user && user.id) {
-      _initFolders();
-      _saveUser(user);
+      //bind the store to a dynamic URL
+      _initStore(user.id);
+
+      var userObj = {
+        id: user.id,
+        uid: user.uid,
+        provider: user.provider,
+        username: user.username,
+        accessToken: user.accessToken
+      };
+
+      Store.set({
+        user: userObj
+      });
+
+      //initial import
+      if(!Store.get('imported')){
+        _getStars();
+        Store.set('imported', true);
+      }
     }
   }.bind(this));
 })
@@ -75,26 +102,16 @@ vent.on('auth:login', function(){
 
 vent.on('auth:logout', function(){
   firebaseAuth.logout();
+  //true to reload from the server rather than the cache
+  location.reload(true);
 });
 
 /**
  * For folders
  */
-var _saveFoldersToFirebase = function(folders){
-  var user = Store.get('user');
-  if(user){
-    firebaseRef.child('people').child( user.id ).child('folders')
-      .set(folders);
-  }
-};
 
-var defaultFolder = {
-  name: '',
-  repos: []
-};
-
-vent.on('folder:create', function(data){
-  var foldersCopy = (Store.get('folders') || []).slice();
+vent.on('folder:create', function(){
+  var foldersCopy = deepcopy(Store.get('folders'));
   var numberFolders = foldersCopy.length;
 
   var newFolderName = 'Folder ' + foldersCopy.length;
@@ -102,7 +119,28 @@ vent.on('folder:create', function(data){
   foldersCopy.push(newFolder);
 
   Store.set('folders', foldersCopy);
-  _saveFoldersToFirebase(foldersCopy);
+});
+
+vent.on('folder:update', function(payload){
+  var cardId = payload.cardId,
+    folderIndex = payload.folderIndex;
+
+  var foldersCopy = deepcopy(Store.get('folders'));
+  //delete from everywhere
+  _.each(foldersCopy, function(folder){
+    if(folder.repos){
+      delete folder.repos[cardId];
+    }
+  });
+  //add to target
+  foldersCopy[folderIndex].repos = foldersCopy[folderIndex].repos || {};
+  foldersCopy[folderIndex].repos[cardId] = true;
+
+  Store.set('folders', foldersCopy);
+});
+
+vent.on('folderIndex:update', function(newIndex){
+  Store.set('folderIndex', newIndex);
 });
 
 /**
@@ -119,27 +157,44 @@ var _transformStars = function(input){
   return output;
 };
 
-var _saveStarsToFirebase = function(stars){
-  var user = Store.get('user');
-  if(user){
-    firebaseRef.child('people').child( user.id ).child('stars')
-      .set(stars);
+var _saveToDefaultFolder = function(stars){
+  //deep clone is necessary to trigger change
+  //trigger change is necessary for Firebase to sync
+  var foldersCopy = deepcopy(Store.get('folders'));
+  if(foldersCopy.length<1) {
+    foldersCopy.push(defaultFolder);
   }
+
+  var firstFolder = foldersCopy[0];
+  _.chain(stars)
+    .keys()
+    .each(function(key){
+      firstFolder.repos = firstFolder.repos || {};
+      firstFolder.repos[key] = true;
+    });
+
+  Store.set('folders', foldersCopy);
 };
 
-vent.on('star:read', function(){
-  console.log('getStars');
-  var githubApi = 'https://api.github.com';
-  var token = '&access_token=' + this.state.user.accessToken;
-  $.ajax({
-      type: 'GET',
-      url: githubApi + '/users/shaohua/starred?per_page=100' + token
-    })
-    .then(function(data){
-      var transformed = this._transformStars(data);
-      this._saveStarsToFirebase(transformed);
-    }.bind(this));
-});
+var _getStars = function(){
+  var user = Store.get('user');
+  if(user){
+    var githubApi = 'https://api.github.com';
+    var token = '&access_token=' + user.accessToken;
+    $.ajax({
+        type: 'GET',
+        url: githubApi + '/users/shaohua/starred?per_page=100' + token
+      })
+      .then(function(data){
+        var transformed = _transformStars(data);
+        Store.set({
+          stars: transformed
+        });
+
+        _saveToDefaultFolder(transformed);
+      }.bind(this));
+  }
+};
 
 /**
  * For Firebase
@@ -148,4 +203,4 @@ vent.on('firebase:off', function(){
   firebaseRef.off();
 });
 
-module.exports = Store;
+module.exports = dfd.promise();

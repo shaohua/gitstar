@@ -10,14 +10,13 @@
 
 var _ = require('underscore'),
   $ = require('jquery'),
-  React = require('react');
+  React = require('react'),
+  RB = require('react-bootstrap');
 
 var Card = React.createClass({
   onDragStart: function(event){
-    var testData = {
-      name: 'facebook/react'
-    };
-    event.dataTransfer.setData('text', JSON.stringify(testData));
+    var dragData = this.props.cardId;
+    event.dataTransfer.setData('text', dragData);
   },
 
   onDragEnd: function(event){
@@ -26,17 +25,33 @@ var Card = React.createClass({
   },
 
   render: function(){
+    var card = this.props.card,
+      cardId = this.props.cardId;
     return (
       <div
         draggable="true"
         onDragStart={this.onDragStart}
         onDragEnd={this.onDragEnd}
-        className="col-lg-3 col-md-6 panel panel-primary">
-        <div className="panel-heading">facebook/react</div>
-        <div class="panel-body">
-          <p>React is a JavaScript library for building user interfaces. It's declarative, efficient, and extremely flexible. What's more, it works with the libraries and frameworks that you already know.</p>
+        className="col-lg-3 col-md-6">
+        <div className="panel panel-success">
+          <div className="panel-heading">
+            <RB.Row>
+              <RB.Col xs={3}>
+                <img
+                  src={card.owner.avatar_url}
+                  className="img-responsive img-rounded"/>
+              </RB.Col>
+              <RB.Col xs={9}>
+                {card.full_name}
+              </RB.Col>
+            </RB.Row>
+          </div>
+          <div className="panel-footer">
+            <span className="pull-left"><RB.Glyphicon glyph="star-empty" /> {card.watchers_count}</span>
+            <span className="pull-right"></span>
+            <div className="clearfix"></div>
+          </div>
         </div>
-        <div className="panel-footer">Preview</div>
       </div>
     );
   }

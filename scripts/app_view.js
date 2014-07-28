@@ -10,20 +10,47 @@ var _ = require('underscore'),
   Store = require('./store'),
   Actions = require('./actions');
 
-var _getStateFromStore = function(){
+/**
+ * methods to derive data
+ * todo
+ * good idea or not?
+ */
+var _getStarsCurrentFolder = function(myStore){
+  if(_.isUndefined(myStore.folders) ||
+     _.isUndefined(myStore.folderIndex) ||
+     _.isUndefined(myStore.stars)
+    ) {
+    return;
+  }
+
+  var currentFolder = myStore.folders[myStore.folderIndex];
+  if(currentFolder){
+    var starsInCurrentFolder = _.keys(currentFolder.repos);
+    return _.pick(myStore.stars, starsInCurrentFolder);
+  }
+};
+
+var _getStateFromStore = function(myStore){
+  //myStore is NO longer a Backbone model
+  // console.log('myStore', myStore);
   return {
-    folders: Store.get('folders') || [],
-    user: Store.get('user')
+    folders: myStore.folders, //array
+    folderIndex: myStore.folderIndex, //int
+    stars: myStore.stars, //object
+    starsCurrentFolder: _getStarsCurrentFolder(myStore),  //derived data
+    user: myStore.user
   };
 };
 
 var AppView = React.createClass({
   getInitialState: function(){
-    return _getStateFromStore();
+    return {};
   },
 
-  _onRefreshState: function(){
-    this.setState( _getStateFromStore() );
+  _onRefreshState: function(myStore){
+    this.setState( _getStateFromStore(myStore.val()), function(){
+      console.log('_onRefreshState', this.state);
+    }.bind(this) );
   },
 
   componentWillMount: function(){
@@ -31,41 +58,33 @@ var AppView = React.createClass({
   },
 
   componentDidMount: function(){
-    Store.on('change', this._onRefreshState);
+    Store.then(function(myStore){
+      myStore.firebase.on('value', this._onRefreshState);
+    }.bind(this));
   },
 
   //unbind events
   componentWillUnmount: function(){
     Actions.offFirebase();
-    Store.off('change', this._onRefreshState);
-  },
-
-  getStars: function(){
-    Actions.readStar();
-  },
-
-  onLogin: function(){
-    Actions.trigger('auth:login');
-  },
-
-  onLogout: function(){
-    Actions.trigger('auth:logout');
+    Store.then(function(myStore){
+      myStore.firebase.off('value', this._onRefreshState);
+    }.bind(this));
   },
 
   render: function() {
     return (
       <div>
         <RB.Grid>
-          <Header onLogin={this.onLogin}/>
+          <Header user={this.state.user}/>
           <RB.Row>
             <RB.Col sm={3} className="gs-column-groups">
-              <button onClick={this.getStars}>getStars</button>
               <Folders
+                folderIndex={this.state.folderIndex}
                 folders={this.state.folders}/>
             </RB.Col>
 
             <RB.Col sm={9} className="gs-column-repos col-sm-offset-3">
-              <Cards />
+              <Cards cards={this.state.starsCurrentFolder}/>
             </RB.Col>
           </RB.Row>
 

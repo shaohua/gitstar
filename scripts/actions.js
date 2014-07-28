@@ -17,8 +17,12 @@ var Actions = {
     vent.trigger('folder:create');
   },
 
-  readStar: function(){
-    vent.trigger('star:read');
+  updateFolder: function(payload){
+    vent.trigger('folder:update', payload);
+  },
+
+  updateFolderIndex: function(payload){
+    vent.trigger('folderIndex:update', payload);
   },
 
   offFirebase: function(){

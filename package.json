@@ -42,6 +42,9 @@
     },
     "react-bootstrap": {
       "exports": "global:ReactBootstrap"
+    },
+    "backbone": {
+      "exports": "global:Backbone"
     }
   }
 }

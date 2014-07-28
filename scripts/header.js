@@ -1,11 +1,23 @@
 /** @jsx React.DOM */
 var _ = require('underscore'),
   $ = require('jquery'),
-  React = require('react');
+  React = require('react'),
+  Actions = require('./actions');
 
 var Header = React.createClass({
+  onLogin: function(){
+    Actions.authLogin();
+  },
+
+  onLogout: function(){
+    Actions.authLogout();
+  },
+
   render: function(){
-    var logoText = "GitStar - organize your Github stars";
+    var logoText = "GitStar - organize your Github stars",
+    loginButton = <a href="#" onClick={this.onLogin}>Login</a>,
+    logoutButton = <a href="#" onClick={this.onLogout}>Logout</a>;
+
     return (
       <div className="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div className="container-fluid">
@@ -21,7 +33,7 @@ var Header = React.createClass({
           <div className="navbar-collapse collapse">
             <ul className="nav navbar-nav navbar-right">
               <li>
-                <a href="#" onClick={this.props.onLogin}>Profile</a>
+                {this.props.user ? logoutButton : loginButton}
               </li>
               <li><a href="#">Help</a></li>
             </ul>
