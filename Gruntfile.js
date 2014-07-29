@@ -8,6 +8,13 @@ module.exports = function(grunt) {
       path: '.',
       name: 'gitstar'
     },
+    mocha: {
+      src: ['test_runner.html'],
+      options: {
+        reporter: 'Spec',
+        run: true
+      }
+    },
     connect: {
       server: {
         options: {
@@ -21,6 +28,11 @@ module.exports = function(grunt) {
       dev: {
         files: {
           '<%= opts.path %>/dist/<%= opts.name %>.js': ['<%= opts.path %>/scripts/index.js'],
+        }
+      },
+      test: {
+        files: {
+          '<%= opts.path %>/dist/spec.js': ['<%= opts.path %>/test/**/*_spec.js']
         }
       }
     },
@@ -50,5 +62,6 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.registerTask('test', ['browserify', 'mocha']);
   grunt.registerTask('default', ['stylus', 'browserify', 'connect', 'watch']);
 };
