@@ -42,7 +42,9 @@ var Card = React.createClass({
                   className="img-responsive img-rounded"/>
               </RB.Col>
               <RB.Col xs={9}>
-                {card.full_name}
+                <a href={card.html_url} target='_blank'>
+                  {card.full_name}
+                </a>
               </RB.Col>
             </RB.Row>
           </div>
