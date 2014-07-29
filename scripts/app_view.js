@@ -4,6 +4,7 @@ var _ = require('underscore'),
   // moment = require('moment'),
   React = require('react'),
   Header = require('./header'),
+  Landing = require('./landing'),
   Folders = require('./folders'),
   Cards = require('./Cards'),
   RB = require('react-bootstrap'),
@@ -72,26 +73,36 @@ var AppView = React.createClass({
   },
 
   render: function() {
-    return (
-      <div>
-        <RB.Grid>
-          <Header user={this.state.user}/>
-          <RB.Row>
-            <RB.Col sm={3} className="gs-column-groups">
-              <Folders
-                folderIndex={this.state.folderIndex}
-                folders={this.state.folders}/>
-            </RB.Col>
-
-            <RB.Col sm={9} className="gs-column-repos col-sm-offset-3">
-              <Cards cards={this.state.starsCurrentFolder}/>
-            </RB.Col>
-          </RB.Row>
-
-        </RB.Grid>
-
-      </div>
+    var loggedIn = (
+      <RB.Grid>
+        <RB.Row>
+          <RB.Col sm={3} className="gs-column-groups">
+            <Folders
+              folderIndex={this.state.folderIndex}
+              folders={this.state.folders}/>
+          </RB.Col>
+          <RB.Col sm={9} className="gs-column-repos col-sm-offset-3">
+            <Cards cards={this.state.starsCurrentFolder}/>
+          </RB.Col>
+        </RB.Row>
+      </RB.Grid>
     );
+
+    if(this.state.user) {
+      return (
+        <div>
+          <Header user={this.state.user}/>
+          {loggedIn}
+        </div>
+      );
+    } else {
+      return (
+        <div className='gs-fullwidth'}>
+          <Header/>
+          <Landing />
+        </div>
+      );
+    }
   }
 });
 
