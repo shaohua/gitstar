@@ -92,7 +92,7 @@ vent.on('auth', function(){
       }
     }
   }.bind(this));
-})
+});
 
 vent.on('auth:login', function(){
   firebaseAuth.login('github', {
