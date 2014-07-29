@@ -1,10 +1,36 @@
 /* mobile */
-.gs-column-groups {
+body {
+  background-color: #222222;
+}
+
+.gs-column-groups,
+.gs-column-repos,
+.gs-landing {
   margin-top: 51px;
 }
 
-@media (min-width: 768px){
-  //sm
+.gs-fullwidth{
+  //background image from http://startbootstrap.com/templates/landing-page/
+  background: url(../img/landing-bg.jpg) no-repeat center center;
+  background-size: cover;
+  .gs-message {
+    text-align: center;
+    padding-top: 20%;
+    padding-bottom: 20%;
+    color: #f8f8f8;
+    .intro-divider {
+      border-top: 1px solid #f8f8f8;
+      border-bottom: 1px solid rgba(0,0,0,0.2);
+    }
+  }
+}
+
+/* variables */
+$screen-sm-min = 768px;
+$screen-lg-min = 1200px;
+
+/* Small devices (tablets, 768px and up) */
+@media (min-width: $screen-sm-min){
   body, html {
     margin: 0;
     height:100%;
@@ -13,28 +39,15 @@
   /* mimicking sb-admin theme */
   .gs-column-groups {
     position: fixed;
-    // top: 51px;
     left: 0;
     height: 100%;
-    // margin: 0;
-    // border: none;
-    // border-radius: 0;
     overflow-y: auto;
     background-color: #222;
   }
-
-  .gs-column-repos {
-    margin-top: 51px;
-  }
-
 }
 
-@media (min-width: 992px) {
-  //md
-}
-
-@media (min-width: 1200px) {
-  //lg
+/* Large devices (large desktops, 1200px and up) */
+@media (min-width:  $screen-lg-min) {
   .panel-heading {
     height: 61px;
     word-wrap: break-word;
