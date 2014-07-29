@@ -223,7 +223,9 @@ var Card = React.createClass({displayName: 'Card',
                   className: "img-responsive img-rounded"})
               ), 
               RB.Col({xs: 9}, 
-                card.full_name
+                React.DOM.a({href: card.html_url, target: "_blank"}, 
+                  card.full_name
+                )
               )
             )
           ), 
@@ -322,8 +324,8 @@ module.exports = Folder;
 /** @jsx React.DOM */
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null),
   $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null),
-  React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null)
-  RB = (typeof window !== "undefined" ? window.ReactBootstrap : typeof global !== "undefined" ? global.ReactBootstrap : null)
+  React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null),
+  RB = (typeof window !== "undefined" ? window.ReactBootstrap : typeof global !== "undefined" ? global.ReactBootstrap : null),
   Folder = require('./folder'),
   Actions = require('./actions');
 
@@ -464,6 +466,7 @@ module.exports = Landing;
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./actions":2}],10:[function(require,module,exports){
 (function (global){
+/* global Firebase, FirebaseSimpleLogin */
 var vent = require('./vent').getInstance(),
   _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null),
   $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null),
@@ -502,7 +505,7 @@ var _initStore = function(userId){
   Store = new FirebaseModel();
 
   //fill defaults after loading
-  Store.firebase.on('value', function(storeSnap){
+  Store.firebase.on('value', function(){
     // console.log('storeSnap', storeSnap.val());
 
     if( _.isUndefined(Store.get('folders')) ) {
@@ -558,7 +561,7 @@ vent.on('auth', function(){
       }
     }
   }.bind(this));
-})
+});
 
 vent.on('auth:login', function(){
   firebaseAuth.login('github', {
@@ -578,8 +581,6 @@ vent.on('auth:logout', function(){
 
 vent.on('folder:create', function(){
   var foldersCopy = deepcopy(Store.get('folders'));
-  var numberFolders = foldersCopy.length;
-
   var newFolderName = 'Folder ' + foldersCopy.length;
   var newFolder = _.extend({}, defaultFolder, {name: newFolderName});
   foldersCopy.push(newFolder);
