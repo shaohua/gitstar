@@ -50,7 +50,7 @@ var AppView = React.createClass({
 
   _onRefreshState: function(myStore){
     this.setState( _getStateFromStore(myStore.val()), function(){
-      console.log('_onRefreshState', this.state);
+      // console.log('_onRefreshState', this.state);
     }.bind(this) );
   },
 

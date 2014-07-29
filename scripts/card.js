@@ -21,7 +21,7 @@ var Card = React.createClass({
 
   onDragEnd: function(event){
     //todo, delete card after drag end and a success drop
-    console.log('onDragEnd');
+    // console.log('onDragEnd');
   },
 
   render: function(){
