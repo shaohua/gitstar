@@ -118,7 +118,7 @@ var AppView = React.createClass({displayName: 'AppView',
 
   _onRefreshState: function(myStore){
     this.setState( _getStateFromStore(myStore.val()), function(){
-      console.log('_onRefreshState', this.state);
+      // console.log('_onRefreshState', this.state);
     }.bind(this) );
   },
 
@@ -202,7 +202,7 @@ var Card = React.createClass({displayName: 'Card',
 
   onDragEnd: function(event){
     //todo, delete card after drag end and a success drop
-    console.log('onDragEnd');
+    // console.log('onDragEnd');
   },
 
   render: function(){
