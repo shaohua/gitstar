@@ -1,8 +1,8 @@
 /** @jsx React.DOM */
 var _ = require('underscore'),
   $ = require('jquery'),
-  React = require('react')
-  RB = require('react-bootstrap')
+  React = require('react'),
+  RB = require('react-bootstrap'),
   Folder = require('./folder'),
   Actions = require('./actions');
 
