@@ -64,7 +64,7 @@ var Actions = {
 
 module.exports = Actions;
 
-},{"./vent":10}],3:[function(require,module,exports){
+},{"./vent":11}],3:[function(require,module,exports){
 (function (global){
 /** @jsx React.DOM */
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null),
@@ -72,6 +72,7 @@ var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined
   // moment = require('moment'),
   React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null),
   Header = require('./header'),
+  Landing = require('./landing'),
   Folders = require('./folders'),
   Cards = require('./Cards'),
   RB = (typeof window !== "undefined" ? window.ReactBootstrap : typeof global !== "undefined" ? global.ReactBootstrap : null),
@@ -140,33 +141,43 @@ var AppView = React.createClass({displayName: 'AppView',
   },
 
   render: function() {
-    return (
-      React.DOM.div(null, 
-        RB.Grid(null, 
-          Header({user: this.state.user}), 
-          RB.Row(null, 
-            RB.Col({sm: 3, className: "gs-column-groups"}, 
-              Folders({
-                folderIndex: this.state.folderIndex, 
-                folders: this.state.folders})
-            ), 
-
-            RB.Col({sm: 9, className: "gs-column-repos col-sm-offset-3"}, 
-              Cards({cards: this.state.starsCurrentFolder})
-            )
+    var loggedIn = (
+      RB.Grid(null, 
+        RB.Row(null, 
+          RB.Col({sm: 3, className: "gs-column-groups"}, 
+            Folders({
+              folderIndex: this.state.folderIndex, 
+              folders: this.state.folders})
+          ), 
+          RB.Col({sm: 9, className: "gs-column-repos col-sm-offset-3"}, 
+            Cards({cards: this.state.starsCurrentFolder})
           )
-
         )
-
       )
     );
+
+    if(this.state.user) {
+      return (
+        React.DOM.div(null, 
+          Header({user: this.state.user}), 
+          loggedIn
+        )
+      );
+    } else {
+      return (
+        React.DOM.div({className: "gs-fullwidth"}, 
+          Header(null), 
+          Landing(null)
+        )
+      );
+    }
   }
 });
 
 module.exports = AppView;
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Cards":1,"./actions":2,"./folders":6,"./header":7,"./store":9}],4:[function(require,module,exports){
+},{"./Cards":1,"./actions":2,"./folders":6,"./header":7,"./landing":9,"./store":10}],4:[function(require,module,exports){
 (function (global){
 /** @jsx React.DOM */
 /**
@@ -363,7 +374,7 @@ var Header = React.createClass({displayName: 'Header',
   },
 
   render: function(){
-    var logoText = "GitStar - organize your Github stars",
+    var logoText = "GitStar - organize your GitHub stars",
     loginButton = React.DOM.a({href: "#", onClick: this.onLogin}, "Login"),
     logoutButton = React.DOM.a({href: "#", onClick: this.onLogout}, "Logout");
 
@@ -383,8 +394,7 @@ var Header = React.createClass({displayName: 'Header',
             React.DOM.ul({className: "nav navbar-nav navbar-right"}, 
               React.DOM.li(null, 
                 this.props.user ? logoutButton : loginButton
-              ), 
-              React.DOM.li(null, React.DOM.a({href: "#"}, "Help"))
+              )
             )
           )
         )
@@ -411,6 +421,48 @@ $(document).ready(function(){
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"./app_view":3}],9:[function(require,module,exports){
+(function (global){
+/** @jsx React.DOM */
+var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null),
+  $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null),
+  React = (typeof window !== "undefined" ? window.React : typeof global !== "undefined" ? global.React : null),
+  RB = (typeof window !== "undefined" ? window.ReactBootstrap : typeof global !== "undefined" ? global.ReactBootstrap : null),
+  Actions = require('./actions');
+
+var Landing = React.createClass({displayName: 'Landing',
+  onLogin: function(){
+    Actions.authLogin();
+  },
+
+  render: function(){
+    return (
+      RB.Grid(null, 
+        RB.Row(null, 
+          RB.Col({lg: 12, className: "gs-landing"}, 
+            RB.Row(null, 
+              RB.Col({lg: 4, className: "col-lg-offset-4"}, 
+                React.DOM.div({className: "gs-message"}, 
+                  React.DOM.h3(null, "Organize your GitHub stars by drag-and-drop"), 
+                  React.DOM.hr({className: "intro-divider"}), 
+                  React.DOM.a({onClick: this.onLogin, 
+                    className: "btn btn-default btn-lg"}, 
+                    React.DOM.i({className: "fa fa-github fa-fw"}), 
+                    "Login with Github"
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+});
+
+module.exports = Landing;
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./actions":2}],10:[function(require,module,exports){
 (function (global){
 var vent = require('./vent').getInstance(),
   _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null),
@@ -620,7 +672,7 @@ vent.on('firebase:off', function(){
 module.exports = dfd.promise();
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./vent":10}],10:[function(require,module,exports){
+},{"./vent":11}],11:[function(require,module,exports){
 (function (global){
 var _ = (typeof window !== "undefined" ? window._ : typeof global !== "undefined" ? global._ : null),
   $ = (typeof window !== "undefined" ? window.$ : typeof global !== "undefined" ? global.$ : null),

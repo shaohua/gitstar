@@ -1,7 +1,28 @@
 /* mobile */
-.gs-column-groups {
+body {
+  background-color: #222;
+}
+.gs-column-groups,
+.gs-column-repos,
+.gs-landing {
   margin-top: 51px;
 }
+.gs-fullwidth {
+  background: url("../img/landing-bg.jpg") no-repeat center center;
+  background-size: cover;
+}
+.gs-fullwidth .gs-message {
+  text-align: center;
+  padding-top: 20%;
+  padding-bottom: 20%;
+  color: #f8f8f8;
+}
+.gs-fullwidth .gs-message .intro-divider {
+  border-top: 1px solid #f8f8f8;
+  border-bottom: 1px solid rgba(0,0,0,0.2);
+}
+/* variables */
+/* Small devices (tablets, 768px and up) */
 @media (min-width: 768px) {
   body,
   html {
@@ -15,10 +36,8 @@
     overflow-y: auto;
     background-color: #222;
   }
-  .gs-column-repos {
-    margin-top: 51px;
-  }
 }
+/* Large devices (large desktops, 1200px and up) */
 @media (min-width: 1200px) {
   .panel-heading {
     height: 61px;
