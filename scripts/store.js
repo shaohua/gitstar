@@ -182,7 +182,7 @@ var _getStars = function(){
     var token = '&access_token=' + user.accessToken;
     $.ajax({
         type: 'GET',
-        url: githubApi + '/users/shaohua/starred?per_page=100' + token
+        url: githubApi + '/users/' + user.username + '/starred?per_page=100' + token
       })
       .then(function(data){
         var transformed = _transformStars(data);
