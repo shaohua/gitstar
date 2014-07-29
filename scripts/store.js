@@ -1,3 +1,4 @@
+/* global Firebase, FirebaseSimpleLogin */
 var vent = require('./vent').getInstance(),
   _ = require('underscore'),
   $ = require('jquery'),
@@ -36,7 +37,7 @@ var _initStore = function(userId){
   Store = new FirebaseModel();
 
   //fill defaults after loading
-  Store.firebase.on('value', function(storeSnap){
+  Store.firebase.on('value', function(){
     // console.log('storeSnap', storeSnap.val());
 
     if( _.isUndefined(Store.get('folders')) ) {
@@ -112,8 +113,6 @@ vent.on('auth:logout', function(){
 
 vent.on('folder:create', function(){
   var foldersCopy = deepcopy(Store.get('folders'));
-  var numberFolders = foldersCopy.length;
-
   var newFolderName = 'Folder ' + foldersCopy.length;
   var newFolder = _.extend({}, defaultFolder, {name: newFolderName});
   foldersCopy.push(newFolder);
