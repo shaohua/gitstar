@@ -97,7 +97,7 @@ var AppView = React.createClass({
       );
     } else {
       return (
-        <div className='gs-fullwidth'}>
+        <div className='gs-fullwidth'>
           <Header/>
           <Landing />
         </div>
