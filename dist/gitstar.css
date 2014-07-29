@@ -1,0 +1,27 @@
+/* mobile */
+.gs-column-groups {
+  margin-top: 51px;
+}
+@media (min-width: 768px) {
+  body,
+  html {
+    margin: 0;
+    height: 100%;
+  }
+  .gs-column-groups {
+    position: fixed;
+    left: 0;
+    height: 100%;
+    overflow-y: auto;
+    background-color: #222;
+  }
+  .gs-column-repos {
+    margin-top: 51px;
+  }
+}
+@media (min-width: 1200px) {
+  .panel-heading {
+    height: 61px;
+    word-wrap: break-word;
+  }
+}
