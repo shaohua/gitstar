@@ -14,7 +14,7 @@ var Header = React.createClass({
   },
 
   render: function(){
-    var logoText = "GitStar - organize your Github stars",
+    var logoText = "GitStar - organize your GitHub stars",
     loginButton = <a href="#" onClick={this.onLogin}>Login</a>,
     logoutButton = <a href="#" onClick={this.onLogout}>Logout</a>;
 
@@ -35,7 +35,6 @@ var Header = React.createClass({
               <li>
                 {this.props.user ? logoutButton : loginButton}
               </li>
-              <li><a href="#">Help</a></li>
             </ul>
           </div>
         </div>
